@@ -13,10 +13,15 @@
 
 using System;
 using System.Configuration;
+using System.IO;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin;
 using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.Google;
+using Newtonsoft.Json.Linq;
 using Owin;
 using SimpleInjector;
 using TicketDesk.Web.Identity;
@@ -89,13 +94,36 @@ namespace TicketDesk.Web.Client
             //    ClientSecret = ""
             //});
 
-
+            ConfigureGoogleAuth(app);
 
             if (DatabaseConfig.IsFirstRunDemoRefreshEnabled())
             {
                 DemoIdentityDataManager.SetupDemoIdentityData(container.GetInstance<TdIdentityContext>());
             }
 
+        }
+
+        public const string TokenClaimName = "access_token";
+
+        private void ConfigureGoogleAuth(IAppBuilder app) {
+            var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data\\oauth-google.json");
+            var configJson = File.ReadAllText(configPath);
+            var config = JObject.Parse(configJson);
+            var clientId = config["web"]["client_id"].ToString();
+            var clientSecret = config["web"]["client_secret"].ToString();
+
+            var options = new GoogleOAuth2AuthenticationOptions {
+                ClientId = clientId,
+                ClientSecret = clientSecret,
+                Provider = new GoogleOAuth2AuthenticationProvider {
+                    OnAuthenticated = context => {
+                        var accessToken = context.AccessToken;
+                        context.Identity.AddClaim(new Claim(TokenClaimName, accessToken));
+                        return Task.FromResult(0);
+                    }
+                }
+            };
+            app.UseGoogleAuthentication(options);
         }
     }
 }
