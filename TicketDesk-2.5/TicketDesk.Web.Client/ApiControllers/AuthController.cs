@@ -5,15 +5,18 @@ using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
-using TicketDesk.Web.Client;
 using TicketDesk.Web.Client.Infrastructure.Extensions;
 using TicketDesk.Web.Identity.Model;
 
-namespace TicketDesk.Web.Service.Controllers {
+namespace TicketDesk.Web.Client.ApiControllers {
     [RoutePrefix("auth")]
+    [AllowAnonymous]
     public class AuthController : Controller {
         private TicketDeskUserManager UserManager { get; set; }
         private TicketDeskSignInManager SignInManager { get; set; }
+        private IAuthenticationManager AuthenticationManager {
+            get { return HttpContext.GetOwinContext().Authentication; }
+        }
 
         public AuthController(TicketDeskUserManager userManager, TicketDeskSignInManager signInManager) {
             UserManager = userManager;
@@ -52,7 +55,6 @@ namespace TicketDesk.Web.Service.Controllers {
         // POST: /auth/login/google
         [HttpPost]
         [Route("login/google")]
-        [AllowAnonymous]
         public ActionResult LoginByGoogle(string returnUrl) {
             return ExternalLogin(returnUrl, "Google");
         }
@@ -61,7 +63,6 @@ namespace TicketDesk.Web.Service.Controllers {
         // POST: /auth/login/external
         [HttpPost]
         [Route("login/external")]
-        [AllowAnonymous]
         public ActionResult ExternalLogin(string returnUrl, string provider) {
             if(string.IsNullOrEmpty(returnUrl)) {
                 return RedirectFailedLogin(null, "returnUrl can not be empty");
@@ -75,8 +76,8 @@ namespace TicketDesk.Web.Service.Controllers {
 
         //
         // GET: /auth/login/external/callback
+        [HttpGet]
         [Route("login/external/callback")]
-        [AllowAnonymous]
         public async Task<ActionResult> ExternalLoginCallback(string returnUrl) {
             var loginInfo = await AuthenticationManager.GetExternalLoginInfoAsync();
             if(loginInfo == null) {
@@ -98,6 +99,15 @@ namespace TicketDesk.Web.Service.Controllers {
                     var registrationResult = await Register(loginInfo);
                     return registrationResult ? RedirectSuccessLogin(returnUrl) : RedirectFailedLogin(returnUrl, "Invalid auto-register attempt");
             }
+        }
+
+        // TODO: test this method
+        //
+        // POST: /auth/logout
+        [HttpPost]
+        [Route("logout")]
+        public void Logout() {
+            AuthenticationManager.SignOut();
         }
         
         private async Task<bool> Register(ExternalLoginInfo info) {
@@ -135,10 +145,6 @@ namespace TicketDesk.Web.Service.Controllers {
 
         // Used for XSRF protection when adding external logins
         private const string XsrfKey = "XsrfId";
-
-        private IAuthenticationManager AuthenticationManager {
-            get { return HttpContext.GetOwinContext().Authentication; }
-        }
 
         internal class ChallengeResult : HttpUnauthorizedResult {
             public ChallengeResult(string provider, string redirectUri)

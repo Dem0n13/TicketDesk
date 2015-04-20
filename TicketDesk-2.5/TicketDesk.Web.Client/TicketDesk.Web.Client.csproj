@@ -225,7 +225,7 @@
     <Compile Include="App_Start\IdentityConfig.cs" />
     <Compile Include="App_Start\Startup.Routes.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
-    <Compile Include="Controllers\AuthController.cs" />
+    <Compile Include="ApiControllers\AuthController.cs" />
     <Compile Include="Controllers\PushNotificationSettingsController.cs" />
     <Compile Include="Controllers\ApplicationSettingsController.cs" />
     <Compile Include="Controllers\FirstRunSetupController.cs" />
