@@ -247,7 +247,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Api\Controllers\TicketsController.cs" />
-    <Compile Include="Api\Controllers\StatusesController.cs" />
+    <Compile Include="Api\Controllers\StaticEntitiesController.cs" />
     <Compile Include="Api\Dtos\TicketDto.cs" />
     <Compile Include="App_Start\Startup.Insights.cs" />
     <Compile Include="App_Start\Startup.PushNotifications.cs" />
