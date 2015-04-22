@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Web;
 
-namespace TicketDesk.Web.Client.Infrastructure.Extensions {
+namespace TicketDesk.Web.Client.Api.Framework {
     public static class UriExtensions {
         public static Uri AddQuery(this Uri uri, string name, string value) {
             if(uri == null) {

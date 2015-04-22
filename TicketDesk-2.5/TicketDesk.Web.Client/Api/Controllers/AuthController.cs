@@ -5,10 +5,10 @@ using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
-using TicketDesk.Web.Client.Infrastructure.Extensions;
+using TicketDesk.Web.Client.Api.Framework;
 using TicketDesk.Web.Identity.Model;
 
-namespace TicketDesk.Web.Client.ApiControllers {
+namespace TicketDesk.Web.Client.Api.Controllers {
     [RoutePrefix("auth")]
     [AllowAnonymous]
     public class AuthController : Controller {

@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Http;
 using System.Web.Mvc;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
@@ -29,6 +30,7 @@ using SimpleInjector;
 using SimpleInjector.Advanced;
 using SimpleInjector.Integration.Web;
 using SimpleInjector.Integration.Web.Mvc;
+using SimpleInjector.Integration.WebApi;
 using TicketDesk.Domain;
 using TicketDesk.PushNotifications.Common;
 using TicketDesk.Web.Identity;
@@ -43,7 +45,7 @@ namespace TicketDesk.Web.Client
             var container = GetInitializedContainer(app);
 
             DependencyResolver.SetResolver(new SimpleInjectorDependencyResolver(container));
-
+            GlobalConfiguration.Configuration.DependencyResolver = new SimpleInjectorWebApiDependencyResolver(container);
             return container;
         }
 
@@ -112,9 +114,8 @@ namespace TicketDesk.Web.Client
             container.RegisterInitializer<TicketDeskUserManager>(manager =>
                 InitializeUserManager(manager, app));
 
-
             container.RegisterMvcControllers(Assembly.GetExecutingAssembly());
-
+            container.RegisterWebApiControllers(GlobalConfiguration.Configuration);
             return container;
         }
 
