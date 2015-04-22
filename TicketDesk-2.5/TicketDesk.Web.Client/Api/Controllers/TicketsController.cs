@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.OData;
 using TicketDesk.Domain;
 using TicketDesk.Web.Client.Api.Dtos;
 
@@ -16,6 +17,7 @@ namespace TicketDesk.Web.Client.Api.Controllers {
 
         // GET: api/tickets
         [HttpGet]
+        [EnableQuery]
         public IQueryable<TicketDto> GetAll() {
             return _domainContext.Tickets.ToArray()
                 .Select(ticket => new TicketDto(ticket))
