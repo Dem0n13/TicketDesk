@@ -116,10 +116,11 @@ namespace TicketDesk.Web.Client.ApiControllers {
                 Email = info.Email,
                 DisplayName = info.ExternalIdentity.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name") ?? info.DefaultUserName
             };
-            var result = await UserManager.CreateAsync(user);
-            if(result.Succeeded) {
-                result = await UserManager.AddLoginAsync(user.Id, info.Login);
-                if(result.Succeeded) {
+            var createResult = await UserManager.CreateAsync(user);
+            var addToRoleResult = await UserManager.AddToRoleAsync(user.Id, "TdInternalUsers");
+            if(createResult.Succeeded && addToRoleResult.Succeeded) {
+                createResult = await UserManager.AddLoginAsync(user.Id, info.Login);
+                if(createResult.Succeeded) {
                     await SignInManager.SignInAsync(user, false, false);
                     return true;
                 }
