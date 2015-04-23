@@ -88,7 +88,7 @@ namespace TicketDesk.Web.Client.Api.Controllers {
             //var accessToken = loginInfo.ExternalIdentity.FindFirstValue(Startup.TokenClaimName);
             switch(signInStatus) {
                 case SignInStatus.Success:
-                    return RedirectSuccessLogin(returnUrl);
+                    return RedirectToAction("RedirectSuccessLogin", new { returnUrl });
                 case SignInStatus.LockedOut:
                     return RedirectFailedLogin(returnUrl, "LockedOut does not support in api-mode");
                 case SignInStatus.RequiresVerification:
@@ -128,8 +128,11 @@ namespace TicketDesk.Web.Client.Api.Controllers {
             return false;
         }
 
-        private ActionResult RedirectSuccessLogin(string returnUrl) {
-            return Redirect(returnUrl);
+        public ActionResult RedirectSuccessLogin(string returnUrl) {
+            var cookie = Request.Cookies[Auth.CookieName];
+            return cookie != null
+                ? Redirect(UpdateReturnUrl(returnUrl, "cookie", cookie.Value))
+                : RedirectFailedLogin(returnUrl, "Internal login error");
         }
 
         private ActionResult RedirectFailedLogin(string returnUrl, string message) {

@@ -24,14 +24,14 @@ using Microsoft.Owin.Security.Google;
 using Newtonsoft.Json.Linq;
 using Owin;
 using SimpleInjector;
+using TicketDesk.Web.Client.Api.Framework;
 using TicketDesk.Web.Identity;
 using TicketDesk.Web.Identity.Migrations;
 using TicketDesk.Web.Identity.Model;
 
 namespace TicketDesk.Web.Client
 {
-    public partial class Startup
-    {
+    public partial class Startup {
         // For more information on configuring authentication, please visit http://go.microsoft.com/fwlink/?LinkId=301864
         public void ConfigureAuth(IAppBuilder app, Container container)
         {
@@ -53,7 +53,7 @@ namespace TicketDesk.Web.Client
             // Configure the sign in cookie
             app.UseCookieAuthentication(new CookieAuthenticationOptions
             {
-                AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie,
+                AuthenticationType = Auth.AuthenticationType,
                 LoginPath = new PathString("/account/login"),
                 Provider = new CookieAuthenticationProvider
                 {
@@ -63,8 +63,8 @@ namespace TicketDesk.Web.Client
                         validateInterval: TimeSpan.FromMinutes(30),
                         regenerateIdentity: (manager, user) => user.GenerateUserIdentityAsync(manager))
                 }
-            });       
-     
+            });
+
             app.UseExternalSignInCookie(DefaultAuthenticationTypes.ExternalCookie);
 
             // Enables the application to temporarily store user information when they are verifying the second factor in the two-factor authentication process.
@@ -88,42 +88,14 @@ namespace TicketDesk.Web.Client
             //   appId: "",
             //   appSecret: "");
 
-            //app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
-            //{
-            //    ClientId = "",
-            //    ClientSecret = ""
-            //});
-
-            ConfigureGoogleAuth(app);
+            var googleOAuthConfigPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data\\oauth-google.json");
+            var googleOAuthOptions = Auth.ReadGoogleOAuthOptions(googleOAuthConfigPath);
+            app.UseGoogleAuthentication(googleOAuthOptions);
 
             if (DatabaseConfig.IsFirstRunDemoRefreshEnabled())
             {
                 DemoIdentityDataManager.SetupDemoIdentityData(container.GetInstance<TdIdentityContext>());
             }
-
-        }
-
-        public const string TokenClaimName = "access_token";
-
-        private void ConfigureGoogleAuth(IAppBuilder app) {
-            var configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "App_Data\\oauth-google.json");
-            var configJson = File.ReadAllText(configPath);
-            var config = JObject.Parse(configJson);
-            var clientId = config["web"]["client_id"].ToString();
-            var clientSecret = config["web"]["client_secret"].ToString();
-
-            var options = new GoogleOAuth2AuthenticationOptions {
-                ClientId = clientId,
-                ClientSecret = clientSecret,
-                Provider = new GoogleOAuth2AuthenticationProvider {
-                    OnAuthenticated = context => {
-                        var accessToken = context.AccessToken;
-                        context.Identity.AddClaim(new Claim(TokenClaimName, accessToken));
-                        return Task.FromResult(0);
-                    }
-                }
-            };
-            app.UseGoogleAuthentication(options);
         }
     }
 }
