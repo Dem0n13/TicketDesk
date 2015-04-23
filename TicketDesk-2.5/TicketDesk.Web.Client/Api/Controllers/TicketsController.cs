@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.OData;
@@ -11,9 +12,11 @@ namespace TicketDesk.Web.Client.Api.Controllers {
     [ApiAuthorize(Roles = "TdInternalUsers")]
     public class TicketsController : ApiController {
         private readonly TdDomainContext _domainContext;
+        private readonly Func<string, string> _getUserDisplayName;
 
         public TicketsController(TdDomainContext domainContext) {
             _domainContext = domainContext;
+            _getUserDisplayName = domainContext.SecurityProvider.GetUserDisplayName;
         }
 
         // GET: api/tickets
@@ -22,7 +25,7 @@ namespace TicketDesk.Web.Client.Api.Controllers {
         [EnableQuery]
         public IQueryable<TicketDto> GetAll() {
             return _domainContext.Tickets.ToArray()
-                .Select(ticket => new TicketDto(ticket))
+                .Select(ticket => new TicketDto(ticket, _getUserDisplayName))
                 .AsQueryable();
         }
 
@@ -34,7 +37,7 @@ namespace TicketDesk.Web.Client.Api.Controllers {
             if(ticket == null) {
                 return NotFound();
             }
-            return Ok(new TicketDto(ticket));
+            return Ok(new TicketDto(ticket, _getUserDisplayName));
         }
 
         // POST: api/tickets
@@ -48,7 +51,7 @@ namespace TicketDesk.Web.Client.Api.Controllers {
             var ticket = dto.ToTicket();
             _domainContext.Tickets.Add(ticket);
             await _domainContext.SaveChangesAsync();
-            return Ok(new TicketDto(ticket));
+            return Ok(new TicketDto(ticket, _getUserDisplayName));
         }
 
         // PUT: api/tickets/5
@@ -68,7 +71,7 @@ namespace TicketDesk.Web.Client.Api.Controllers {
 
             dto.MergeTo(ticket);
             await _domainContext.SaveChangesAsync();
-            return Ok(new TicketDto(ticket));
+            return Ok(new TicketDto(ticket, _getUserDisplayName));
         }
 
         // DELETE: api/tickets/5

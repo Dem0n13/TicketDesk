@@ -7,14 +7,14 @@ namespace TicketDesk.Web.Client.Api.Dtos {
         public TicketDto() {
         }
 
-        public TicketDto(Ticket ticket) {
+        public TicketDto(Ticket ticket, Func<string, string> getUserDisplayName) {
             Id = ticket.TicketId;
             Type = ticket.TicketType;
             Category = ticket.Category;
             Title = ticket.Title;
             Details = ticket.Details;
             CreatedDate = ticket.CreatedDate;
-            Owner = ticket.Owner;
+            Owner = getUserDisplayName(ticket.Owner);
             Status = ticket.TicketStatus;
         }
 
