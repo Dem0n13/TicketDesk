@@ -4,10 +4,11 @@ using System.Web.Http;
 using System.Web.Http.OData;
 using TicketDesk.Domain;
 using TicketDesk.Web.Client.Api.Dtos;
+using TicketDesk.Web.Client.Api.Framework;
 
 namespace TicketDesk.Web.Client.Api.Controllers {
     [RoutePrefix("api/tickets")]
-    [Authorize(Roles = "TdInternalUsers")]
+    [ApiAuthorize(Roles = "TdInternalUsers")]
     public class TicketsController : ApiController {
         private readonly TdDomainContext _domainContext;
 
@@ -17,6 +18,7 @@ namespace TicketDesk.Web.Client.Api.Controllers {
 
         // GET: api/tickets
         [HttpGet]
+        [Route]
         [EnableQuery]
         public IQueryable<TicketDto> GetAll() {
             return _domainContext.Tickets.ToArray()
@@ -37,6 +39,7 @@ namespace TicketDesk.Web.Client.Api.Controllers {
 
         // POST: api/tickets
         [HttpPost]
+        [Route]
         public async Task<IHttpActionResult> Create(TicketDto dto) {
             if(!ModelState.IsValid) {
                 return BadRequest(ModelState);

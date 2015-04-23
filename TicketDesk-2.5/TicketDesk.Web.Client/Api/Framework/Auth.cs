@@ -11,6 +11,7 @@ namespace TicketDesk.Web.Client.Api.Framework {
         public const string AuthenticationType = DefaultAuthenticationTypes.ApplicationCookie;
         public const string CookieName = CookieAuthenticationDefaults.CookiePrefix + AuthenticationType;
         public const string TokenClaimName = "access_token";
+        public const string SuppressRedirectHeader = "Suppress-Redirect";
 
         public static GoogleOAuth2AuthenticationOptions ReadGoogleOAuthOptions(string configPath) {
             var configJson = File.ReadAllText(configPath);

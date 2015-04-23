@@ -61,7 +61,13 @@ namespace TicketDesk.Web.Client
                     // This is a security feature which is used when you change a password or add an external login to your account.  
                     OnValidateIdentity = SecurityStampValidator.OnValidateIdentity<TicketDeskUserManager, TicketDeskUser>(
                         validateInterval: TimeSpan.FromMinutes(30),
-                        regenerateIdentity: (manager, user) => user.GenerateUserIdentityAsync(manager))
+                        regenerateIdentity: (manager, user) => user.GenerateUserIdentityAsync(manager)),
+                    OnApplyRedirect = context => {
+                        var suppressRedirect = context.OwinContext.Response.Headers.Get(Auth.SuppressRedirectHeader) == true.ToString();
+                        if(!suppressRedirect) {
+                            context.Response.Redirect(context.RedirectUri);
+                        }
+                    }
                 }
             });
 

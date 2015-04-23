@@ -3,10 +3,11 @@ using System.Linq;
 using System.Web.Http;
 using TicketDesk.Domain;
 using TicketDesk.Domain.Model;
+using TicketDesk.Web.Client.Api.Framework;
 
 namespace TicketDesk.Web.Client.Api.Controllers {
     [RoutePrefix("api")]
-    [Authorize(Roles = "TdInternalUsers")]
+    [ApiAuthorize(Roles = "TdInternalUsers")]
     public class StaticEntitiesController : ApiController {
         private static readonly object Statuses = Enum.GetValues(typeof(TicketStatus))
             .Cast<TicketStatus>()
