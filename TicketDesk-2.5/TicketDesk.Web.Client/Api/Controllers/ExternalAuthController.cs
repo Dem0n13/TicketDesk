@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -86,13 +87,13 @@ namespace TicketDesk.Web.Client.Api.Controllers {
             var user = new TicketDeskUser {
                 UserName = info.Email,
                 Email = info.Email,
-                DisplayName = info.ExternalIdentity.FindFirstValue("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name") ?? info.DefaultUserName
+                DisplayName = info.ExternalIdentity.FindFirstValue(ClaimTypes.Name) ?? info.DefaultUserName
             };
             var createResult = await UserManager.CreateAsync(user);
-            var addToRoleResult = await UserManager.AddToRoleAsync(user.Id, "TdInternalUsers");
-            if(createResult.Succeeded && addToRoleResult.Succeeded) {
-                createResult = await UserManager.AddLoginAsync(user.Id, info.Login);
-                if(createResult.Succeeded) {
+            if(createResult.Succeeded) {
+                var addToRoleResult = await UserManager.AddToRoleAsync(user.Id, "TdInternalUsers");
+                var addLoginResult = await UserManager.AddLoginAsync(user.Id, info.Login);
+                if(addToRoleResult.Succeeded && addLoginResult.Succeeded) {
                     await SignInManager.SignInAsync(user, false, false);
                     return true;
                 }
@@ -106,7 +107,7 @@ namespace TicketDesk.Web.Client.Api.Controllers {
         }
 
         private ActionResult RedirectSuccessLogin(string returnUrl) {
-            return RedirectToAction("SuccessLoginCallback", new { returnUrl });
+            return RedirectToAction("SuccessLoginCallback", new {returnUrl});
         }
 
         private ActionResult RedirectFailedLogin(string returnUrl, string message) {
